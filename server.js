@@ -7,7 +7,7 @@ const io = socketIo(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
-    credentials: true
+    // credentials: true
   }
 });
 
@@ -16,10 +16,13 @@ let currentUsers = 0;
 
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
-
+  // increment count for new users
   currentUsers += 1;
 
-  io.emit('currentUsers', currentUsers);
+  // update count of users for all clients
+  io.emit('userCount', currentUsers);
+
+  //send updated board state to the new client
   socket.emit('boardState', boardState);
 
   socket.on('draw', (drawData) => {
@@ -36,7 +39,7 @@ io.on('connection', (socket) => {
     console.log('Client disconnected:', socket.id);
     currentUsers -= 1;
 
-    io.emit('currentUsers', currentUsers);
+    io.emit('userCount', currentUsers);
   });
 });
 

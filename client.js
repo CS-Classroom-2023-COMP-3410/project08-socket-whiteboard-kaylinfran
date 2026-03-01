@@ -40,8 +40,32 @@ document.addEventListener('DOMContentLoaded', () => {
   // TODO: Set up Socket.IO event handlers
   socket.on('connect', () => {
     connectionStatus.textContent = 'Connected';
-    console.log('Connected to server with ID:', socket.id);
+    console.log('Connected to server with the ID:', socket.id);
+  });
+
+  // update the user count 
+  socket.on('userCount', (count) => {
+    userCount.textContent = `Active Users: ${count}`;
   })
+
+  socket.on('draw', (drawData) => {
+    boardState.push(drawData);
+    drawLine(
+      drawData.x0,
+      drawData.y0,
+      drawData.x1,
+      drawData.y1,
+      drawData.color,
+      drawData.size
+    )
+  });
+  
+  // show updated board state when a new client joins
+  socket.on('boardState', (board) => {
+    boardState = board;
+    redrawCanvas(boardState);
+  })
+
   // Canvas event handlers
   // TODO: Add event listeners for mouse events (mousedown, mousemove, mouseup, mouseout)
   canvas.addEventListener('mousedown', startDrawing);
@@ -57,8 +81,13 @@ document.addEventListener('DOMContentLoaded', () => {
   canvas.addEventListener('touchcancel', stopDrawing);
 
   // Clear button event handler
-  // TODO: Add event listener for the clear button
   clearButton.addEventListener('click', clearCanvas);
+
+  // TODO: Add event listener for the clear button
+  socket.on('clear', () => {
+    boardState = [];
+    context.clearRect(0, 0, canvas.width, canvas.height);
+  })
 
   // Update brush size display
   // TODO: Add event listener for brush size input changes
